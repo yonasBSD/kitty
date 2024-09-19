@@ -194,14 +194,14 @@ void main() {
     // }}}
 
     // Background {{{
-    float cell_has_non_default_bg = step(1, float(abs(
+    float cell_background_should_be_transparent = step(1, float(abs(
         (bg_as_uint - default_colors[1]) * (bg_as_uint - second_transparent_bg)
     )));
     draw_bg = 1;
 
 #if (PHASE == PHASE_BACKGROUND)
     // draw_bg_bitfield has bit 0 set to draw default bg cells and bit 1 set to draw non-default bg cells
-    uint draw_bg_mask = uint(2 * cell_has_non_default_bg + (1 - cell_has_non_default_bg));
+    uint draw_bg_mask = uint(2 * cell_background_should_be_transparent + (1 - cell_background_should_be_transparent));
     draw_bg = step(1, float(draw_bg_bitfield & draw_bg_mask));
 #endif
 
@@ -213,7 +213,7 @@ void main() {
     // selections/block cursor and 0 everywhere else.
     float is_special_cell = cell_data.has_block_cursor + float(is_selected & ONE);
 #if (PHASE != PHASE_SPECIAL)
-    is_special_cell += cell_has_non_default_bg + float(is_reversed);
+    is_special_cell += cell_background_should_be_transparent + float(is_reversed);
 #endif
     bg_alpha = step(0.5, is_special_cell);
 #if (PHASE != PHASE_SPECIAL)
