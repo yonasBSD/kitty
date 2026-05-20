@@ -136,3 +136,14 @@ safe_dup2(int a, int b) {
     while((ret = dup2(a, b)) < 0 && errno == EINTR);
     return ret;
 }
+
+static inline void
+safe_zero_mem(void *mem, size_t sz) {
+#ifdef __APPLE__
+    memset_s(mem, sz);
+#elif defined(__NetBSD__)
+    explicit_memset(mem, sz);
+#else
+    explicit_bzero(mem, sz);
+#endif
+}
