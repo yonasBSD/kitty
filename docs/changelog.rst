@@ -173,7 +173,7 @@ consumption to do the same tasks.
 Detailed list of changes
 -------------------------------------
 
-0.47.2 [future]
+0.47.2 [2026-06-07]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Allow dragging to move scrollbar after clicking on track when :opt:`scrollbar_jump_on_click` is enabled (:pull:`10085`)
@@ -189,6 +189,8 @@ Detailed list of changes
 - When watching for changed config files do not recursively watch all sub directories of the directory containing the config file (:iss:`10102`)
 
 - File transfer protocol: use O_NOFOLLOW when opening regular files
+
+- dnd kitten: Protect against drops from malicious sources
 
 
 0.47.1 [2026-05-28]
