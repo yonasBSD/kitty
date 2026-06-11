@@ -182,6 +182,11 @@ Detailed list of changes
 
 - Fix :opt:`focus_follows_mouse` switching the active window when returning to a desktop/space, even though the mouse did not move. Now the window under a stationary cursor is left alone, while moving the mouse across windows still switches focus as before.
 
+- Sanitise responses to color control escape codes to avoid command injection for shells that dont use the kitty keyboard protocol
+
+- choose fonts kitten: Fix a rare timing based race causing kitten to crash at startup (:pull:`10128`)
+
+
 0.47.2 [2026-06-07]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
