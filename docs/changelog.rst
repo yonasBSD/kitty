@@ -173,7 +173,7 @@ consumption to do the same tasks.
 Detailed list of changes
 -------------------------------------
 
-0.50.0 [future]
+0.47.3 [2026-06-12]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - macOS: Show a key symbol on the active tab if the macOS Secure Input feature is enabled
@@ -185,6 +185,8 @@ Detailed list of changes
 - Sanitise responses to color control escape codes to avoid command injection for shells that do not use the kitty keyboard protocol (:cve:`2026-54057`)
 
 - choose fonts kitten: Fix a rare timing based race causing kitten to crash at startup (:pull:`10128`)
+
+- Wayland: Fix mouse input getting broken when starting a tab drag and releasing the mouse button before the drag is actually registered (:pull:`10136`)
 
 
 0.47.2 [2026-06-07]
