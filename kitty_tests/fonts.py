@@ -390,6 +390,30 @@ class Rendering(FontBaseTest):
             self.assertGreater(w, 64)
             self.assertGreater(h, 64)
 
+    def test_color_emoji_not_shrunk(self):
+        # Regression test for https://github.com/kovidgoyal/kitty/issues/10144.
+        # fontconfig gives fixed-size color faces (e.g. Noto Color Emoji) a
+        # pixel-size fixup encoded as FC_MATRIX. That scale must not reach the
+        # cairo font matrix used for color glyphs; applying it shrinks color emoji
+        # to a dot (ee937bdd1b). Render the same font two ways at the same size:
+        # from its fontconfig descriptor, which carries the fixup matrix, and from
+        # its file path, which does not. A correct build renders both at the same
+        # size; the bug shrinks the descriptor one. Comparing the two is
+        # environment-independent since only the matrix differs.
+        if is_macos:
+            self.skipTest('FC_MATRIX is a fontconfig feature, not used on macOS')
+        from kitty.fonts.fontconfig import fc_match
+        desc = dict(fc_match('emoji', False, False, 0))
+        if not (desc.get('color') and desc.get('matrix')):
+            self.skipTest('no fixed-size color emoji font with a fontconfig fixup matrix')
+        with_matrix = face_from_descriptor(desc)
+        with_matrix.set_size(64, 96, 96)
+        without_matrix = create_face(desc['path'])
+        without_matrix.set_size(64, 96, 96)
+        _, mw, mh = with_matrix.render_codepoint(0x1F40D)
+        _, rw, rh = without_matrix.render_codepoint(0x1F40D)
+        self.assertGreater(mh, 0.5 * rh, f'color emoji shrunk by FC_MATRIX: {mh}px vs {rh}px (#10144)')
+
     def test_shaping(self):
 
         def ss(text, font=None):
