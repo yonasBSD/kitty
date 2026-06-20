@@ -386,6 +386,20 @@ class TestGraphics(BaseTest):
         self.assertIsNone(li(payload='2' * 12, z=77, m=1, q=2))
         self.assertIsNone(li(payload='2' * 12))
 
+    def test_transient_graphics_image(self):
+        s, g, pl, sl = load_helpers(self)
+        self.assertEqual(g.disk_cache.end_of_data_offset(), 0)
+        self.ae(pl('abc', s=1, v=1, f=24, N=1), 'OK')
+        self.assertTrue(g.disk_cache.wait_for_write())
+        self.assertEqual(g.disk_cache.end_of_data_offset(), 0)
+        img = g.image_for_client_id(1)
+        self.assertIsNotNone(img)
+        self.ae(img['data'], b'abc')
+
+        self.ae(pl('def', s=1, v=1, f=24, i=2), 'OK')
+        self.assertTrue(g.disk_cache.wait_for_write())
+        self.assertGreater(g.disk_cache.end_of_data_offset(), 0)
+
     def test_load_images(self):
         s, g, pl, sl = load_helpers(self)
         self.assertEqual(g.disk_cache.total_size, 0)
@@ -1304,6 +1318,25 @@ class TestGraphics(BaseTest):
         s.reset()
         self.ae(g.image_count, 0)
         self.assertEqual(g.disk_cache.total_size, 0)
+
+    def test_transient_image_preferential_eviction(self):
+        # Transient images should be evicted before non-transient ones when
+        # the storage quota is exceeded, regardless of insertion order.
+        s = self.create_screen()
+        g = s.grman
+        g.storage_limit = 36 * 2
+        li = make_send_command(s)
+        # Load a non-transient image first (older atime) and a transient image second.
+        self.assertEqual(li(a='T', i=1).code, 'OK')
+        self.assertEqual(li(a='T', i=2, N=1).code, 'OK')
+        self.assertEqual(g.image_count, 2)
+        # Adding a third image triggers the quota; the transient image (i=2) must be
+        # evicted first even though the non-transient image (i=1) is older.
+        self.assertEqual(li(a='T', i=3).code, 'OK')
+        self.assertEqual(g.image_count, 2)
+        self.assertIsNone(g.image_for_client_id(2), 'transient image should have been evicted')
+        self.assertIsNotNone(g.image_for_client_id(1), 'non-transient image should survive')
+        self.assertIsNotNone(g.image_for_client_id(3), 'newly added image should survive')
 
     @unittest.skipIf(Image is None, 'PIL not available, skipping PNG tests')
     def test_cached_rgba_conversion(self):
