@@ -126,11 +126,8 @@ jobs:
           - name: Run go vet
             run: go version && go vet -tags testing ./...
 
-          - name: Build man page
-            run: make FAIL_WARN=1 man
-
-          - name: Build HTML docs
-            run: make FAIL_WARN=1 html
+          - name: Build docs
+            run: make FAIL_WARN=1 docs
 
           - name: Build static kittens
             run: python setup.py build-static-binaries
@@ -143,6 +140,7 @@ jobs:
                 os: [ubuntu-latest, macos-latest]
         env:
             KITTY_BUNDLE: 1
+            KITTY_SANITIZE: 1
         steps:
           - name: Checkout source code
             uses: actions/checkout@v6.0.3
